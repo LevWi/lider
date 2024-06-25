@@ -11,7 +11,7 @@ type UserData struct {
 type WhiteListEntry UserData
 
 type WhiteUserList interface {
-    add(user UserID) error
-    FindByID(user UserID) (WhiteListEntry, error)
-    Remove(user UserID) error
+    Add(user WhiteListEntry) error
+    FindByID(userId UserID) (WhiteListEntry, error)
+    Remove(userId UserID) error
 }
