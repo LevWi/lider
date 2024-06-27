@@ -54,6 +54,9 @@ func (db WhiteUserListDB) Add(data WhiteListEntry) error {
 
 func (db WhiteUserListDB) FindByID(userId UserID) (out WhiteListEntry, err error) {
 	err = db.QueryRow(sqlFindPattern, userId).Scan(&out.Id, &out.Name)
+	if err == sql.ErrNoRows {
+		err = ErrNotFound
+	}
 	return
 }
 

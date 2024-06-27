@@ -1,10 +1,12 @@
 package privacy
 
+import "errors"
+
 type UserID int64
 
 type UserData struct {
 	Id UserID
-    Name string //optional
+    Name string
     // TODO add timepoint ?
 }
 
@@ -15,3 +17,5 @@ type WhiteUserList interface {
     FindByID(userId UserID) (WhiteListEntry, error)
     Remove(userId UserID) error
 }
+
+var ErrNotFound = errors.New("WhiteUserList: not found")
