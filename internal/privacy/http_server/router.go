@@ -32,11 +32,14 @@ func whiteListAdd(wl privacy.WhiteUserList) http.HandlerFunc {
 		usdata := make([]byte, 0, 64)
 		var err error
 		for {
-			_, err = r.Body.Read(data)
+			var n int
+			n, err = r.Body.Read(data)
+			if n > 0 {
+				usdata = append(usdata, data[:n]...)
+			}
 			if err != nil {
 				break
 			}
-			usdata = append(usdata, data...)
 		}
 		if err != io.EOF {
 			goto END
@@ -44,6 +47,7 @@ func whiteListAdd(wl privacy.WhiteUserList) http.HandlerFunc {
 
 		{
 			var out privacy.WhiteListEntry
+			fmt.Println(usdata)
 			err = json.Unmarshal(usdata, &out)
 			if err != nil {
 				goto END
@@ -69,23 +73,27 @@ func whiteListUserCheck(wl privacy.WhiteUserList) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tgId := chi.URLParam(r, "tgId")
 		userId, err := strconv.ParseInt(tgId, 10, 0)
+		handleStatus := func(status int) {
+			w.WriteHeader(status)
+			w.Write([]byte(http.StatusText(status)))
+		}
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
+			handleStatus(http.StatusBadRequest)
+			return
 		}
 		wlEntry, err := wl.FindByID(privacy.UserID(userId))
 		if err != nil {
 			if err == privacy.ErrNotFound {
-				w.WriteHeader(http.StatusNotFound)
+				handleStatus(http.StatusNotFound)
 			} else {
-				// TODO Log error
-				w.WriteHeader(http.StatusInternalServerError)
-
+				handleStatus(http.StatusInternalServerError)
 			}
+			return
 		}
 		jsn, err := json.Marshal(wlEntry)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			// TODO Log error
+			handleStatus(http.StatusInternalServerError)
+			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(jsn)

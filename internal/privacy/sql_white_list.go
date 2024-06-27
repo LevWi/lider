@@ -49,6 +49,7 @@ func initWhiteList(dbName string) (WhiteUserListDB, error) {
 
 func (db WhiteUserListDB) Add(data WhiteListEntry) error {
 	_, err := db.Exec(sqlInsertPattern, data.Id, data.Name)
+	//TODO check that already exist
 	return err
 }
 
