@@ -1,7 +1,6 @@
 package privacy
 
 import (
-    "database/sql"
 	"os"
 	"testing"
 )
@@ -9,13 +8,13 @@ import (
 func TestWhiteList(t *testing.T) {
 	dbPath := t.TempDir() + string(os.PathSeparator) + "test_.db"
 	t.Log("db path:", dbPath)
-	db, err := initWhiteList(dbPath)
+	db, err := initUserList(dbPath, "test_user_table")
 	if err != nil {
 		t.Fatal("initWhiteList fail: ", err)
 	}
 	defer db.Close()
-	dbI := WhiteUserList(db)
-	arr := [3]WhiteListEntry{{1234, "Name1"}, {345, "Name2"}, {678, "Name3"}}
+	dbI := UsersList(db)
+	arr := [3]UsersListEntry{{Id: 1234, Name: "Name1"}, {Id: 345, Name: "Name2"}, {Id: 678, Name: "Name3"}}
 	for _, el := range arr {
 		err = dbI.Add(el)
 		if err != nil {
@@ -33,19 +32,19 @@ func TestWhiteList(t *testing.T) {
 		}
 	}
 
-    checkDeleted := func(userId UserID) {
-        user, err := dbI.FindByID(userId)
-        if err == nil {
-            t.Fatal(".FindByID(). enexpected: ", user)
-        }
-        if err != sql.ErrNoRows {
-            t.Fatal(".FindByID():", err)
-        }
-    }
-    checkDeleted(5)
+	checkDeleted := func(userId UserID) {
+		user, err := dbI.FindByID(userId)
+		if err == nil {
+			t.Fatal(".FindByID(). enexpected: ", user)
+		}
+		if err != ErrNotFound {
+			t.Fatal(".FindByID():", err)
+		}
+	}
+	checkDeleted(5)
 
-    err = dbI.Remove(5)
-    if err != nil {
+	err = dbI.Remove(5)
+	if err != nil {
 		t.Fatal(".Remove(): ", err)
 	}
 
@@ -54,6 +53,6 @@ func TestWhiteList(t *testing.T) {
 		if err != nil {
 			t.Fatal(".FindByID() fail: ", err)
 		}
-        checkDeleted(el.Id)
+		checkDeleted(el.Id)
 	}
 }

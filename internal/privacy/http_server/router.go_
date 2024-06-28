@@ -57,6 +57,7 @@ func whiteListAdd(wl privacy.WhiteUserList) http.HandlerFunc {
 			if err != nil {
 				goto END
 			}
+			w.WriteHeader(http.StatusOK)
 			return
 		}
 	END:
