@@ -2,13 +2,6 @@ package privacy
 
 import "errors"
 
-type UserID int64
-
-type UserData struct {
-	Id UserID
-    Name string
-}
-
 type UsersListEntry UserData
 
 type UsersList interface {
