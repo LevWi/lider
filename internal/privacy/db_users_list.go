@@ -42,7 +42,7 @@ func initUserList(dbName string, tableName string) (DBUsersList, error) {
 
 	_, err = db.Exec(fmt.Sprintf(`create table if not exists %s (
         %s  integer not null,
-        %s  text unique,
+        %s  text not null,
         primary key(%s)
     );`, tableName, tbKeyId, tbKeyName, tbKeyId))
 	if err != nil {
@@ -52,13 +52,13 @@ func initUserList(dbName string, tableName string) (DBUsersList, error) {
 	return DBUsersList{db, userListSqlPatterns(tableName)}, nil
 }
 
-func (db DBUsersList) Add(data UsersListEntry) error {
+func (db *DBUsersList) Add(data UsersListEntry) error {
 	_, err := db.Exec(db.pattrens.Insert, data.Id, data.Name)
 	//TODO check that already exist
 	return err
 }
 
-func (db DBUsersList) FindByID(userId UserID) (out UsersListEntry, err error) {
+func (db *DBUsersList) FindByID(userId UserID) (out UsersListEntry, err error) {
 	err = db.QueryRow(db.pattrens.Find, userId).Scan(&out.Id, &out.Name)
 	if err == sql.ErrNoRows {
 		err = ErrNotFound
@@ -66,7 +66,7 @@ func (db DBUsersList) FindByID(userId UserID) (out UsersListEntry, err error) {
 	return
 }
 
-func (db DBUsersList) Remove(userId UserID) error {
+func (db *DBUsersList) Remove(userId UserID) error {
 	_, err := db.Exec(db.pattrens.Delete, userId)
 	return err
 }

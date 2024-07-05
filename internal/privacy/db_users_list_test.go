@@ -13,7 +13,7 @@ func TestWhiteList(t *testing.T) {
 		t.Fatal("initWhiteList fail: ", err)
 	}
 	defer db.Close()
-	dbI := UsersList(db)
+	dbI := UsersList(&db)
 	arr := [3]UsersListEntry{{Id: 1234, Name: "Name1"}, {Id: 345, Name: "Name2"}, {Id: 678, Name: "Name3"}}
 	for _, el := range arr {
 		err = dbI.Add(el)
